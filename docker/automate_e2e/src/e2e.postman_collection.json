@@ -1,0 +1,1521 @@
+{
+	"info": {
+		"_postman_id": "1516970c-614b-4f79-abdc-8a9478b1073e",
+		"name": "GW APIs e2e",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "24002046"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "#Auth: register",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const moduleName = pm.environment.get(\"module_name\") || \"gateway\";",
+									"",
+									"const baseUrl = pm.environment.get(\"base_url\") || \"http://localhost:5900\";",
+									"",
+									"pm.collectionVariables.set(\"baseUrl\", baseUrl + '/api/' + moduleName);",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"data\": {\n        \"email\": \"admin@admin.com\",\n        \"password\": \"Admin@123\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/admin-console",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"admin-console"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "#Auth: login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    var responseJson = pm.response.json();",
+									"    pm.collectionVariables.set(\"accessToken\", responseJson.credential.accessToken);",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const moduleName = pm.environment.get(\"module_name\") || \"gateway\";",
+									"",
+									"const baseUrl = pm.environment.get(\"base_url\") || \"http://localhost:5900\";",
+									"",
+									"pm.collectionVariables.set(\"baseUrl\", baseUrl + '/api/' + moduleName);",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@admin.com\",\n    \"password\": \"Admin@123\",\n    \"remember_me\": true,\n    \"expires_in\": \"3600m\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/jwt/oauth/admin-console/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"jwt",
+								"oauth",
+								"admin-console",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "OAuth APIs",
+			"item": [
+				{
+					"name": "#1-scope: create scope master",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"data\": {\n        \"name\": \"Gateway service\",\n        \"scope\": \"gateway_service\",\n        \"hostName\": \"http://localhost:3000\",\n        \"urlPath\": \"/\",\n        \"type\": \"service\",\n        \"status\": \"enable\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/scope-master",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"scope-master"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "#2-scope: create scope master",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"data\": {\n        \"name\": \"Merchant Service\",\n        \"scope\": \"merchant_service\",\n        \"hostName\": \"http://localhost:3000\",\n        \"urlPath\": \"/\",\n        \"type\": \"service\",\n        \"status\": \"enable\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/scope-master",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"scope-master"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "#3-scope: create scope master",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"data\": {\n        \"name\": \"Agent Service\",\n        \"scope\": \"agent_service\",\n        \"hostName\": \"http://localhost:3000\",\n        \"urlPath\": \"/\",\n        \"type\": \"service\",\n        \"status\": \"enable\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/scope-master",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"scope-master"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "#4-application: create application asso",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"data\": {\n        \"application\": {\n            \"name\": \"merchant1\",\n            \"description\": \"merchant1 application\",\n            \"redirectUri\": \"http://localhost:3000/callback\",\n            \"status\": \"enable\"\n        },\n        \"scopes\": [1,2,3],\n        \"smsConfig\": {\n            \"name\": \"-\",\n            \"service\": \"smsmkt\",\n            \"apiKey\": \"-\",\n            \"secretKey\": \"-\",\n            \"sender\": \"-\"\n        },\n        \"roles\": [\n            {\n                \"name\": \"admin\",\n                \"status\": \"enable\",\n                \"type\": \"application\",\n                \"permissions\": [\n                    {\n                        \"name\": \"Transaction\",\n                        \"permission\": \"transaction\",\n                        \"status\": \"enable\"\n                    },\n                    {\n                        \"name\": \"Report\",\n                        \"permission\": \"report\",\n                        \"status\": \"enable\"\n                    },\n                    {\n                        \"name\": \"Settlement\",\n                        \"permission\": \"settlement\",\n                        \"status\": \"enable\"\n                    },\n                    {\n                        \"name\": \"User Management\",\n                        \"permission\": \"user_management\",\n                        \"status\": \"enable\"\n                    },\n                    {\n                        \"name\": \"Commission\",\n                        \"permission\": \"commission\",\n                        \"status\": \"enable\"\n                    },\n                    {\n                        \"name\": \"Gateway\",\n                        \"permission\": \"gateway\",\n                        \"status\": \"enable\"\n                    },\n                    {\n                        \"name\": \"Profile\",\n                        \"permission\": \"profile\",\n                        \"status\": \"enable\"\n                    }\n                ]\n            },\n            {\n                \"name\": \"merchant\",\n                \"status\": \"enable\",\n                \"type\": \"application\",\n                \"permissions\": [\n                    {\n                        \"name\": \"Transaction\",\n                        \"permission\": \"transaction\",\n                        \"status\": \"enable\"\n                    },\n                    {\n                        \"name\": \"Report\",\n                        \"permission\": \"report\",\n                        \"status\": \"enable\"\n                    },\n                    {\n                        \"name\": \"Settlement\",\n                        \"permission\": \"settlement\",\n                        \"status\": \"enable\"\n                    },\n                    {\n                        \"name\": \"User Management\",\n                        \"permission\": \"user_management\",\n                        \"status\": \"enable\"\n                    },\n                    {\n                        \"name\": \"Profile\",\n                        \"permission\": \"profile\",\n                        \"status\": \"enable\"\n                    }\n                ]\n            },\n            {\n                \"name\": \"agent\",\n                \"status\": \"enable\",\n                \"type\": \"application\",\n                \"permissions\": [\n                    {\n                        \"name\": \"Commission\",\n                        \"permission\": \"commission\",\n                        \"status\": \"enable\"\n                    },\n                    {\n                        \"name\": \"Profile\",\n                        \"permission\": \"profile\",\n                        \"status\": \"enable\"\n                    },\n                    {\n                        \"name\": \"Report\",\n                        \"permission\": \"report\",\n                        \"status\": \"enable\"\n                    }\n                ]\n            }\n        ]\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/application-asso/:view",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"application-asso",
+								":view"
+							],
+							"variable": [
+								{
+									"key": "view",
+									"value": "application-all"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "#5-user: create user asso",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"data\": {\n        \"user\": {\n            \"originAppId\": 1,\n            \"username\": \"gateway1\",\n            \"email\": \"gateway1@test.com\",\n            \"phone\": \"0815558888\",\n            \"password\": \"P@ssw0rd\",\n            \"status\": \"enable\"\n        },\n        \"applications\": [1],\n        \"scopes\": [1],\n        \"roles\": [\n            {\n                \"name\": \"admin\",\n                \"applicationId\": 1,\n                \"status\": \"enable\",\n                \"type\": \"application\",\n                \"permissions\": [\n                    {\n                        \"name\": \"Transaction\",\n                        \"permission\": \"transaction\",\n                        \"status\": \"enable\"\n                    },\n                    {\n                        \"name\": \"Report\",\n                        \"permission\": \"report\",\n                        \"status\": \"enable\"\n                    },\n                    {\n                        \"name\": \"Settlement\",\n                        \"permission\": \"settlement\",\n                        \"status\": \"enable\"\n                    },\n                    {\n                        \"name\": \"User Management\",\n                        \"permission\": \"user_management\",\n                        \"status\": \"enable\"\n                    },\n                    {\n                        \"name\": \"Commission\",\n                        \"permission\": \"commission\",\n                        \"status\": \"enable\"\n                    },\n                    {\n                        \"name\": \"Gateway\",\n                        \"permission\": \"gateway\",\n                        \"status\": \"enable\"\n                    },\n                    {\n                        \"name\": \"Profile\",\n                        \"permission\": \"profile\",\n                        \"status\": \"enable\"\n                    }\n                ]\n            }\n        ]\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/user-asso/:view",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"user-asso",
+								":view"
+							],
+							"variable": [
+								{
+									"key": "view",
+									"value": "user-all"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "#6-user: create user asso",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"data\": {\n        \"user\": {\n            \"originAppId\": 1,\n            \"username\": \"merchant1\",\n            \"email\": \"merchant1@test.com\",\n            \"phone\": \"0816668889\",\n            \"password\": \"P@ssw0rd\",\n            \"status\": \"enable\"\n        },\n        \"applications\": [1],\n        \"scopes\": [2],\n        \"roles\": [\n            {\n                \"name\": \"merchant\",\n                \"applicationId\": 1,\n                \"status\": \"enable\",\n                \"type\": \"application\",\n                 \"permissions\": [\n                    {\n                        \"name\": \"Transaction\",\n                        \"permission\": \"transaction\",\n                        \"status\": \"enable\"\n                    },\n                    {\n                        \"name\": \"Report\",\n                        \"permission\": \"report\",\n                        \"status\": \"enable\"\n                    },\n                    {\n                        \"name\": \"Settlement\",\n                        \"permission\": \"settlement\",\n                        \"status\": \"enable\"\n                    },\n                    {\n                        \"name\": \"User Management\",\n                        \"permission\": \"user_management\",\n                        \"status\": \"enable\"\n                    },\n                    {\n                        \"name\": \"Profile\",\n                        \"permission\": \"profile\",\n                        \"status\": \"enable\"\n                    }\n                ]\n            }\n        ]\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/user-asso/:view",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"user-asso",
+								":view"
+							],
+							"variable": [
+								{
+									"key": "view",
+									"value": "user-all"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "#7-user: create user asso",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"data\": {\n        \"user\": {\n            \"originAppId\": 1,\n            \"username\": \"merchant2\",\n            \"email\": \"merchant2@test.com\",\n            \"phone\": \"0816668890\",\n            \"password\": \"P@ssw0rd\",\n            \"status\": \"enable\"\n        },\n        \"applications\": [1],\n        \"scopes\": [2],\n        \"roles\": [\n            {\n                \"name\": \"merchant\",\n                \"applicationId\": 1,\n                \"status\": \"enable\",\n                \"type\": \"application\",\n                 \"permissions\": [\n                    {\n                        \"name\": \"Transaction\",\n                        \"permission\": \"transaction\",\n                        \"status\": \"enable\"\n                    },\n                    {\n                        \"name\": \"Report\",\n                        \"permission\": \"report\",\n                        \"status\": \"enable\"\n                    },\n                    {\n                        \"name\": \"Settlement\",\n                        \"permission\": \"settlement\",\n                        \"status\": \"enable\"\n                    },\n                    {\n                        \"name\": \"User Management\",\n                        \"permission\": \"user_management\",\n                        \"status\": \"enable\"\n                    },\n                    {\n                        \"name\": \"Profile\",\n                        \"permission\": \"profile\",\n                        \"status\": \"enable\"\n                    }\n                ]\n            }\n        ]\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/user-asso/:view",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"user-asso",
+								":view"
+							],
+							"variable": [
+								{
+									"key": "view",
+									"value": "user-all"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Authen user",
+			"item": [
+				{
+					"name": "#Auth: login user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    var responseJson = pm.response.json();",
+									"    pm.collectionVariables.set(\"accessToken\", responseJson.credential.accessToken);",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const moduleName = pm.environment.get(\"module_name\") || \"gateway\";",
+									"",
+									"const baseUrl = pm.environment.get(\"base_url\") || \"http://localhost:5900\";",
+									"",
+									"pm.collectionVariables.set(\"baseUrl\", baseUrl + '/api/' + moduleName);",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"gateway1@test.com\",\n    \"password\": \"P@ssw0rd\",\n    \"remember_me\": true,\n    \"expires_in\": \"3600m\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/jwt/oauth/admin-console/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"jwt",
+								"oauth",
+								"admin-console",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Transaction",
+			"item": [
+				{
+					"name": "#Gateway-Create fund account",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"data\": {\n        \"accountNo\": \"1010000001\",\n        \"accountName\": \"Mr. gateway deposit\",\n        \"userId\": 1,\n        \"status\": \"enable\",\n        \"type\": \"DEPOSIT\",\n        \"balance\": 0,\n        \"commissionCharged\": []\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/fund-account",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"fund-account"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "#Gateway-Create fund account",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"data\": {\n        \"accountNo\": \"1010000002\",\n        \"accountName\": \"Mr. gateway withdraw\",\n        \"userId\": 1,\n        \"status\": \"enable\",\n        \"type\": \"WITHDRAW\",\n        \"balance\": 0,\n        \"commissionCharged\": []\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/fund-account",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"fund-account"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "#Gateway-Create fund account",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"data\": {\n        \"accountNo\": \"1010000003\",\n        \"accountName\": \"Mr. gateway fee\",\n        \"userId\": 1,\n        \"status\": \"enable\",\n        \"type\": \"FEE\",\n        \"balance\": 0,\n        \"commissionCharged\": []\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/fund-account",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"fund-account"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "#1-Create fund account",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"data\": {\n        \"accountNo\": \"1001001001\",\n        \"accountName\": \"Mr. merchant1 deposit\",\n        // \"accountRefId\": 1,\n        \"userId\": 2,\n        \"status\": \"enable\",\n        \"type\": \"DEPOSIT\",\n        \"balance\": 0,\n        \"commissionCharged\": []\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/fund-account",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"fund-account"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "#2-Create fund account",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"data\": {\n        \"accountNo\": \"1001001002\",\n        \"accountName\": \"Mr. merchant1 withdraw\",\n        // \"accountRefId\": 1,\n        \"userId\": 2,\n        \"status\": \"enable\",\n        \"type\": \"WITHDRAW\",\n        \"balance\": 0,\n        \"commissionCharged\": []\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/fund-account",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"fund-account"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "#3-Create fund account",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"data\": {\n        \"accountNo\": \"1001001003\",\n        \"accountName\": \"Mr. merchant2 deposit\",\n        // \"accountRefId\": 1,\n        \"userId\": 3,\n        \"status\": \"enable\",\n        \"type\": \"DEPOSIT\",\n        \"balance\": 0,\n        \"commissionCharged\": []\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/fund-account",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"fund-account"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "#4-Create fund account",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"data\": {\n        \"accountNo\": \"1001001004\",\n        \"accountName\": \"Mr. merchant2 withdraw\",\n        // \"accountRefId\": 1,\n        \"userId\": 3,\n        \"status\": \"enable\",\n        \"type\": \"WITHDRAW\",\n        \"balance\": 0,\n        \"commissionCharged\": []\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/fund-account",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"fund-account"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "#5-Create transaction type",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"data\": {\n        \"name\": \"DQR\",\n        \"description\": \"รับเงินด้วยการสแกน QR Code\",\n        \"flag\": \"1\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/transaction-type",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"transaction-type"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "#6-Create transaction type",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"data\": {\n        \"name\": \"WTB\",\n        \"description\": \"โอนเงินออกไปยังธนาคาร\",\n        \"flag\": \"-1\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/transaction-type",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"transaction-type"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "#7-Create transaction type",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"data\": {\n        \"name\": \"DTP\",\n        \"description\": \"รับเงินด้วยการเติมเงิน TOP UP\",\n        \"flag\": \"1\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/transaction-type",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"transaction-type"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "#8-Create transaction type",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"data\": {\n        \"name\": \"DST\",\n        \"description\": \"รับโอนเงินด้วยการ Settlement\",\n        \"flag\": \"1\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/transaction-type",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"transaction-type"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "#9-Create transaction type",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"data\": {\n        \"name\": \"WST\",\n        \"description\": \"โอนออกด้วยการ Settlement\",\n        \"flag\": \"-1\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/transaction-type",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"transaction-type"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "#10-Create transaction type",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"data\": {\n        \"name\": \"WCM\",\n        \"description\": \"โอนออกเป็นค่าคอมมิชชัน\",\n        \"flag\": \"-1\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/transaction-type",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"transaction-type"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "#11-Create transaction type",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"data\": {\n        \"name\": \"DTF\",\n        \"description\": \"รับโอนระหว่างบัญชี\",\n        \"flag\": \"1\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/transaction-type",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"transaction-type"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "#12-Create transaction type",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"data\": {\n        \"name\": \"WTF\",\n        \"description\": \"โอนออกระหว่างบัญชี\",\n        \"flag\": \"-1\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/transaction-type",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"transaction-type"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "#13-Create transaction type",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"data\": {\n        \"name\": \"DTB\",\n        \"description\": \"รับโอนเงินออกไปยังธนาคาร\",\n        \"flag\": \"1\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/transaction-type",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"transaction-type"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "#14-Create transaction type",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"data\": {\n        \"name\": \"FEE\",\n        \"description\": \"ค่าธรรมเนียมการทำรายการ\",\n        \"flag\": \"1\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/transaction-type",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"transaction-type"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "#15-Create transaction type",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"data\": {\n        \"name\": \"DTC\",\n        \"description\": \"รับเงินจาก Commission\",\n        \"flag\": \"1\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/transaction-type",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"transaction-type"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "#16-Create transaction config",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"data\": {\n        \"name\": \"mdr_deposit\",\n        \"value\": \"0\",\n        \"unit\": \"percent\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/transaction-config",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"transaction-config"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "#17-Create transaction config 2",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"data\": {\n        \"name\": \"mdr_withdraw\",\n        \"value\": \"0\",\n        \"unit\": \"percent\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/transaction-config",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"transaction-config"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "#18-Create transaction config 3",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"data\": {\n        \"name\": \"mdr_topup\",\n        \"value\": \"0\",\n        \"unit\": \"percent\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/transaction-config",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"transaction-config"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "#19-Create transaction config 4",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"data\": {\n        \"name\": \"mdr_settlement_calculation\",\n        \"value\": \"0\",\n        \"unit\": \"percent\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/transaction-config",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"transaction-config"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "#20-Create transaction config 5",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"data\": {\n        \"name\": \"mdr_settlement_commission\",\n        \"value\": \"0\",\n        \"unit\": \"percent\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/transaction-config",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"transaction-config"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "#21-Create settlement config",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"data\": {\n        \"minAmount\": 0,\n        \"maxAmount\": 49999,\n        \"isAuto\": false\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/settlement-config",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"settlement-config"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "#22-Create settlement config 2",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"data\": {\n        \"minAmount\": 50000,\n        \"maxAmount\": 9999999999,\n        \"isAuto\": true\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/settlement-config",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"settlement-config"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "#23-Create back account",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"data\": {\n        \"accountNo\": \"1234567890\",\n        \"accountName\": \"Bank merchant1\",\n        \"bankCode\": \"002\",\n        \"userId\": 2\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/bank-account",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"bank-account"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create running doc formatting",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"data\": {\n        \"name\": \"fund_account_no\",\n        \"prefix\": \"010\",\n        \"runningNumber\": 0,\n        \"decimal\": 10\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/running-doc-formatting",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"running-doc-formatting"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create running doc formatting",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"data\": {\n        \"name\": \"order_id\",\n        \"prefix\": \"010\",\n        \"runningNumber\": 0,\n        \"decimal\": 10\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/running-doc-formatting",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"running-doc-formatting"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": ""
+		},
+		{
+			"key": "accessToken",
+			"value": ""
+		},
+		{
+			"key": "qrCodeImg",
+			"value": ""
+		},
+		{
+			"key": "qrCallbackImg",
+			"value": ""
+		}
+	]
+}

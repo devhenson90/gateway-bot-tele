@@ -1,0 +1,33 @@
+{
+    "family": "gateway-bot-prod", 
+    "executionRoleArn": "arn:aws:iam::762233761609:role/ecsTaskExecutionRole",
+    "taskRoleArn": "arn:aws:iam::762233761609:role/ecsTaskExecutionRole",
+    "networkMode": "awsvpc", 
+    "containerDefinitions": [
+        {
+            "name": "gateway-bot-prod",
+            "image": "762233761609.dkr.ecr.ap-southeast-1.amazonaws.com/gateway-bot-prod-ir:latest",
+            "portMappings": [
+                {
+                    "containerPort": 5300, 
+                    "hostPort": 5300, 
+                    "protocol": "tcp"
+                }
+            ],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "gateway-bot-prod",
+                    "awslogs-region": "ap-southeast-1",
+                    "awslogs-stream-prefix": "gateway-bot-prod"
+                }
+            },
+            "essential": true
+        }
+    ], 
+    "requiresCompatibilities": [
+        "FARGATE"
+    ], 
+    "cpu": "256",
+    "memory": "512"
+}
