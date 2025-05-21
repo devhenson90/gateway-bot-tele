@@ -1,4 +1,4 @@
-name: Deploy to AWS ECS API PROD Gateway
+name: Deploy to AWS ECS BOT PROD Gateway
 
 on:
   push:

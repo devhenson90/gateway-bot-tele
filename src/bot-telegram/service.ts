@@ -14,8 +14,33 @@ export class BotTeleService {
     private readonly rdsService: RDSService,
     private readonly dayJsService: DayJsService
   ) {
-    this.bot = new TelegramBot(TOKEN, { polling: true });
+    this.initializeBot();
+  }
+
+  private async initializeBot() {
+    this.bot = new TelegramBot(TOKEN, { polling: false });
+    await this.clearPendingMessages();
+    
+    // Start polling after clearing messages
+    this.bot.startPolling();
+    
+    // Add a small delay before setting up handlers
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
     this.setupBotHandlers();
+  }
+
+  private async clearPendingMessages() {
+    try {
+      const updates = await this.bot.getUpdates({ offset: -1 });
+      if (updates && updates.length > 0) {
+        const lastUpdateId = updates[updates.length - 1].update_id;
+        await this.bot.getUpdates({ offset: lastUpdateId + 1 });
+        console.log('Successfully cleared all pending messages');
+      }
+    } catch (error) {
+      console.error('Error clearing pending messages:', error);
+    }
   }
 
   private setupBotHandlers() {
@@ -55,15 +80,11 @@ export class BotTeleService {
     const selectDeposit = `
         SELECT 
         count(case when transaction_type_id = 1 then 1 else null end) as deposit_count,
-        count(case when transaction_type_id = 2 then 1 else null end) as withdraw_count,
         SUM(case when transaction_type_id = 1 then amount else 0 end) as deposit_amount,
-        SUM(case when transaction_type_id = 2 then amount else 0 end) as withdraw_amount,
         SUM(case when transaction_type_id = 1 then net_amount else 0 end) as deposit_net_amount,
-        SUM(case when transaction_type_id = 2 then net_amount else 0 end) as withdraw_net_amount,
-        SUM(case when transaction_type_id = 1 then mdr_amount else 0 end) as deposit_mdr_amount,
-        SUM(case when transaction_type_id = 2 then mdr_amount else 0 end) as withdraw_mdr_amount
+        SUM(case when transaction_type_id = 1 then mdr_amount else 0 end) as deposit_mdr_amount
         from public."transaction" t 
-        where transaction_type_id IN(1,2) and status = 'SUCCESS' and fund_account_id <> 3 and dest_fund_account_id <> 3
+        where transaction_type_id IN(1) and status = 'SUCCESS' and fund_account_id <> 3 and dest_fund_account_id <> 3
         AND (created_at AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Bangkok') 
         BETWEEN '${startDate}' AND '${endDate}';
     `;
@@ -75,6 +96,20 @@ export class BotTeleService {
       return this.bot.sendMessage(chatId, 'ไม่พบข้อมูล ❌');
     }
 
+    const selectWithdraw = `
+        select SUM(count_of_items) as count_of_items,SUM(summary_amount) as summary_amount from batch_process_withdrawal bpw 
+      where batch_status = 'SUCCESS'
+        AND (updated_at AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Bangkok') 
+        BETWEEN '${startDate}' AND '${endDate}';
+    `;
+
+    const dataWithdraw: any = await this.rdsService.getRDSClient().getSequelize().query(selectWithdraw, {
+      type: QueryTypes.SELECT,
+    });
+    if (dataWithdraw.length === 0) {
+      return this.bot.sendMessage(chatId, 'ไม่พบข้อมูล ❌');
+    }
+    
     const textReport = `
 🕐 ช่วงเวลา: ${startDate} - ${endDate}
 
@@ -85,13 +120,11 @@ export class BotTeleService {
 - ยอดสุทธิหลังหักค่าธรรมเนียม: ${Number(dataDeposit[0]?.deposit_net_amount).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
 
 📤 รายการถอน
-- จำนวนรายการ: ${dataDeposit[0]?.withdraw_count.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-- ยอดรวมทั้งหมด: ${Number(dataDeposit[0]?.withdraw_amount).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-- ค่าธรรมเนียม: ${Number(dataDeposit[0]?.withdraw_mdr_amount).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-- ยอดสุทธิ: ${Number(dataDeposit[0]?.withdraw_net_amount).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+- จำนวนรายการ: ${(dataWithdraw[0]?.count_of_items ?? 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+- ยอดรวมทั้งหมด: ${Number((dataWithdraw[0]?.summary_amount ?? "0")).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
 
-💰 กำไร: ${((dataDeposit[0]?.deposit_amount - dataDeposit[0]?.withdraw_net_amount).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","))} บาท
-📈 กำไร: ${((dataDeposit[0]?.deposit_amount - dataDeposit[0]?.withdraw_net_amount) / dataDeposit[0]?.deposit_net_amount * 100).toFixed(2)}%
+💰 กำไร: ${((dataDeposit[0]?.deposit_amount - dataWithdraw[0]?.summary_amount).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","))} บาท
+📈 กำไร: ${((dataDeposit[0]?.deposit_amount - dataWithdraw[0]?.summary_amount) / dataDeposit[0]?.deposit_amount * 100).toFixed(2)}%
     `;
 
     this.bot.sendMessage(chatId, textReport);

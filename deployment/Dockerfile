@@ -10,5 +10,5 @@ FROM node:20-bullseye
 WORKDIR /app
 COPY --from=builder /app ./
 COPY .env .env
-EXPOSE 5000
+EXPOSE 5300
 CMD ["npm", "run", "start:prod"]
