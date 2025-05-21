@@ -18,7 +18,7 @@ export class BotTeleService {
   }
 
   private async initializeBot() {
-    this.bot = new TelegramBot(TOKEN, { polling: false });
+    this.bot = new TelegramBot(TOKEN, { polling: true });
     await this.clearPendingMessages();
     
     // Start polling after clearing messages
