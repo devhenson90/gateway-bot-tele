@@ -1,0 +1,12 @@
+version: "3.5"
+services:
+  nats:
+    image: nats
+    ports:
+      - "4223:4223"
+      - "8081:8081"
+      - "8222:8222"
+    volumes:
+      - "./tmp/:/tmp"
+    command: "-c /tmp/nats-server.conf"
+

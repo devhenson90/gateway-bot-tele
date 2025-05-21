@@ -1,0 +1,33 @@
+{
+    "family": "gateway-api-dev", 
+    "executionRoleArn": "arn:aws:iam::762233761609:role/ecsTaskExecutionRole",
+    "taskRoleArn": "arn:aws:iam::762233761609:role/ecsTaskExecutionRole",
+    "networkMode": "awsvpc", 
+    "containerDefinitions": [
+        {
+            "name": "gateway-api-dev",
+            "image": "762233761609.dkr.ecr.ap-southeast-1.amazonaws.com/gateway-api-dev-ir:latest",
+            "portMappings": [
+                {
+                    "containerPort": 5000, 
+                    "hostPort": 5000, 
+                    "protocol": "tcp"
+                }
+            ],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "gateway-api-dev",
+                    "awslogs-region": "ap-southeast-1",
+                    "awslogs-stream-prefix": "gateway-api-dev"
+                }
+            },
+            "essential": true
+        }
+    ], 
+    "requiresCompatibilities": [
+        "FARGATE"
+    ], 
+    "cpu": "256",
+    "memory": "512"
+}

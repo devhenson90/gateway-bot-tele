@@ -1,0 +1,38 @@
+version: "3.8"
+
+services:
+  backend:
+    container_name: backend_service
+    build:
+      context: ../../  # Set the context to the root directory
+      dockerfile: docker/be/Dockerfile
+    ports:
+      - "5900:5900" # Adjust the port based on your backend's exposed port
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5900/api/gateway/v1/health"] # Replace with your health endpoint
+      interval: 10s  # How often to check the health
+      timeout: 5s    # Timeout for each check
+      retries: 5     # Number of retries before marking as unhealthy
+    network_mode: "host"
+
+  postman_checks:
+    container_name: e2e_checks
+    image: postman_checks
+    build:
+      context: .
+      dockerfile: Dockerfile  # You need to have a Dockerfile for Postman tests
+    command: >
+      run e2e.postman_collection.json
+      -e environments/e2e.postman_environment.json
+      -r html,cli 
+      --reporter-html-export reports/e2e_test_result.html 
+      --reporter-html-template reports/templates/customTemplate.hbs
+    depends_on:
+      backend:
+        condition: service_healthy # Wait until backend passes the health check
+    volumes:
+      - ./src:/etc/newman
+    network_mode: "host"
+
+networks:
+  default:
