@@ -1,6 +1,8 @@
 # compiled output
 /dist
 /node_modules
+!/artifacts/auth/metadata/*
+!/artifacts/auth/metadata/public.metadata.ts
 
 # Logs
 logs
