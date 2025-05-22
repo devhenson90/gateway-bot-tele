@@ -98,7 +98,7 @@ export class BotTeleService {
 
     const selectWithdraw = `
         select SUM(count_of_items) as count_of_items,SUM(summary_amount) as summary_amount from batch_process_withdrawal bpw 
-      where batch_status = 'SUCCESS'
+      where batch_status IN('SUCCESS', 'PARTIALLY_SUCCESS')
         AND (updated_at AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Bangkok') 
         BETWEEN '${startDate}' AND '${endDate}';
     `;
