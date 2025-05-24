@@ -58,23 +58,34 @@ export class BotTeleService {
   private async getTransactionReport(msg, chatId) {
     console.log(msg.text);
     const text = msg.text.split(' ');
+    let startDateTimeDeposit;
+    let startDateTimeDepositWithHours;
     let dateTime;
     if (text[1] && this.dayJsService.dayjs(text[1], 'YYYY-MM-DD', true).isValid()) {
       dateTime = text[1];
+      startDateTimeDeposit = this.dayJsService.dayjs(text[1], 'YYYY-MM-DD', true).subtract(1, 'day').tz('Asia/Bangkok').format('YYYY-MM-DD');
     } else {
       dateTime = this.dayJsService.dayjs().tz('Asia/Bangkok').format('YYYY-MM-DD');
+      startDateTimeDeposit = this.dayJsService.dayjs().subtract(1, 'day').tz('Asia/Bangkok').format('YYYY-MM-DD');
     }
     let startDate = '';
     let endDate = '';
+    let endDateTimeDepositWithHours;
     if (text.includes('half')) {
       startDate = `${dateTime} 00:00:01`;
+      startDateTimeDepositWithHours = `${startDateTimeDeposit} 23:00:00`;
       endDate = `${dateTime} 12:00:00`;
+      endDateTimeDepositWithHours = `${dateTime} 12:00:00`;
     } else if (text.includes('full')) {
       startDate = `${dateTime} 00:00:01`;
+      startDateTimeDepositWithHours = `${startDateTimeDeposit} 23:00:00`;
       endDate = `${dateTime} 23:59:59`;
+      endDateTimeDepositWithHours = `${dateTime} 22:59:59`;
     } else {
       startDate = `${dateTime} 00:00:01`;
+      startDateTimeDepositWithHours = `${startDateTimeDeposit} 23:00:00`;
       endDate = `${dateTime} 23:59:59`;
+      endDateTimeDepositWithHours = `${dateTime} 22:59:59`;
     }
 
     const selectDeposit = `
@@ -86,7 +97,7 @@ export class BotTeleService {
         from public."transaction" t 
         where transaction_type_id IN(1) and status = 'SUCCESS' and fund_account_id <> 3 and dest_fund_account_id <> 3
         AND (created_at AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Bangkok') 
-        BETWEEN '${startDate}' AND '${endDate}';
+        BETWEEN '${startDateTimeDepositWithHours}' AND '${endDateTimeDepositWithHours}';
     `;
 
     const dataDeposit: any = await this.rdsService.getRDSClient().getSequelize().query(selectDeposit, {
@@ -110,8 +121,24 @@ export class BotTeleService {
       return this.bot.sendMessage(chatId, 'ไม่พบข้อมูล ❌');
     }
     
+    const selectRevertDeposit = `
+        SELECT 
+        count(case when transaction_type_id = 1 then 1 else null end) as deposit_count,
+        SUM(case when transaction_type_id = 1 then amount else 0 end) as deposit_amount,
+        SUM(case when transaction_type_id = 1 then net_amount else 0 end) as deposit_net_amount,
+        SUM(case when transaction_type_id = 1 then mdr_amount else 0 end) as deposit_mdr_amount
+        from public."transaction" t 
+        where transaction_type_id IN(1) and status = 'FAILED' and bank_response IS NOT NULL and fund_account_id <> 3 and dest_fund_account_id <> 3
+        AND (created_at AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Bangkok') 
+        BETWEEN '${startDateTimeDepositWithHours}' AND '${endDateTimeDepositWithHours}';
+    `;
+
+    const dataRevertDeposit: any = await this.rdsService.getRDSClient().getSequelize().query(selectRevertDeposit, {
+      type: QueryTypes.SELECT,
+    });
+
     const textReport = `
-🕐 ช่วงเวลา: ${startDate} - ${endDate}
+🕐 ช่วงเวลาฝาก: ${startDateTimeDepositWithHours} - ${endDateTimeDepositWithHours}
 
 📥 รายการฝาก
 - จำนวนรายการ: ${dataDeposit[0]?.deposit_count.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
@@ -119,12 +146,18 @@ export class BotTeleService {
 - ค่าธรรมเนียม: ${Number(dataDeposit[0]?.deposit_mdr_amount).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
 - ยอดสุทธิหลังหักค่าธรรมเนียม: ${Number(dataDeposit[0]?.deposit_net_amount).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
 
+
+🕐 ช่วงเวลาถอน: ${startDate} - ${endDate}
 📤 รายการถอน
 - จำนวนรายการ: ${(dataWithdraw[0]?.count_of_items ?? 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
 - ยอดรวมทั้งหมด: ${Number((dataWithdraw[0]?.summary_amount ?? "0")).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
 
 💰 กำไร: ${((dataDeposit[0]?.deposit_amount - dataWithdraw[0]?.summary_amount).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","))} บาท
 📈 กำไร: ${((dataDeposit[0]?.deposit_amount - dataWithdraw[0]?.summary_amount) / dataDeposit[0]?.deposit_amount * 100).toFixed(2)}%
+
+🔄 Revert
+- จำนวนรายการ: ${dataRevertDeposit[0]?.deposit_count.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+- ยอดรวมทั้งหมด: ${Number(dataRevertDeposit[0]?.deposit_amount).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
     `;
 
     this.bot.sendMessage(chatId, textReport);
