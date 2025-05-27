@@ -18,23 +18,23 @@ function checkerAuthChatId(chatId: number): boolean {
   return false
 }
 
-export const activateBot = (msg,botTele) :boolean => {
-    const chatId = msg.chat.id;
-    if (!checkerAuthChatId(chatId)) {
-      botTele.sendMessage(chatId, `ห้องแชทนี้ไม่ได้ลงทะเบียนกับ PTT BOT ❌ : ${chatId}`);
-      return false
-    }
-    botTele.sendMessage(chatId, 'PTT BOT Activated ✅');
-    return true
+export const activateBot = (msg, botTele): boolean => {
+  const chatId = msg.chat.id;
+  if (!checkerAuthChatId(chatId)) {
+    botTele.sendMessage(chatId, `ห้องแชทนี้ไม่ได้ลงทะเบียนกับ PTT BOT ❌ : ${chatId}`);
+    return false
+  }
+  botTele.sendMessage(chatId, 'PTT BOT Activated ✅');
+  return true
 }
 
-export const checkGetReportDaily = (msg,botTele) :boolean => {
-    const chatId = msg.chat.id;
-    if (!checkerAuthChatId(chatId)) {
-      botTele.sendMessage(chatId, `ห้องแชทนี้ไม่ได้ลงทะเบียนกับ PTT BOT ❌ : ${chatId}`);
-      return false
-    }
-    return true
+export const checkActivateBot = (msg, botTele): boolean => {
+  const chatId = msg.chat.id;
+  if (!checkerAuthChatId(chatId)) {
+    botTele.sendMessage(chatId, `ห้องแชทนี้ไม่ได้ลงทะเบียนกับ PTT BOT ❌ : ${chatId}`);
+    return false
+  }
+  return true
 }
 
 // Broadcase zone
