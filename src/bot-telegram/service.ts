@@ -217,6 +217,8 @@ export class BotTeleService {
     let startDateTimeDeposit;
     let startDateTimeDepositWithHours;
     let dateTime;
+    let endDateTime;
+    let endDateTimeDeposit;
     if (text[1] && this.dayJsService.dayjs(text[1], 'YYYY-MM-DD', true).isValid()) {
       dateTime = text[1];
       startDateTimeDeposit = this.dayJsService.dayjs(text[1], 'YYYY-MM-DD', true).subtract(1, 'day').tz('Asia/Bangkok').format('YYYY-MM-DD');
@@ -224,24 +226,31 @@ export class BotTeleService {
       dateTime = this.dayJsService.dayjs().tz('Asia/Bangkok').format('YYYY-MM-DD');
       startDateTimeDeposit = this.dayJsService.dayjs().subtract(1, 'day').tz('Asia/Bangkok').format('YYYY-MM-DD');
     }
+
+    if (text[2] && this.dayJsService.dayjs(text[2], 'YYYY-MM-DD', true).isValid()) {
+      endDateTime = text[2];
+    } else {
+      endDateTime = dateTime
+    }
+
     let startDate = '';
     let endDate = '';
     let endDateTimeDepositWithHours;
     if (text.includes('half')) {
       startDate = `${dateTime} 00:00:01`;
       startDateTimeDepositWithHours = `${startDateTimeDeposit} 23:00:00`;
-      endDate = `${dateTime} 12:00:00`;
-      endDateTimeDepositWithHours = `${dateTime} 12:00:00`;
+      endDate = `${endDateTime} 12:00:00`;
+      endDateTimeDepositWithHours = `${endDateTime} 12:00:00`;
     } else if (text.includes('full')) {
       startDate = `${dateTime} 00:00:01`;
       startDateTimeDepositWithHours = `${startDateTimeDeposit} 23:00:00`;
-      endDate = `${dateTime} 23:59:59`;
-      endDateTimeDepositWithHours = `${dateTime} 22:59:59`;
+      endDate = `${endDateTime} 23:59:59`;
+      endDateTimeDepositWithHours = `${endDateTime} 22:59:59`;
     } else {
       startDate = `${dateTime} 00:00:01`;
       startDateTimeDepositWithHours = `${startDateTimeDeposit} 23:00:00`;
-      endDate = `${dateTime} 23:59:59`;
-      endDateTimeDepositWithHours = `${dateTime} 22:59:59`;
+      endDate = `${endDateTime} 23:59:59`;
+      endDateTimeDepositWithHours = `${endDateTime} 22:59:59`;
     }
 
     const selectDeposit = `
@@ -279,12 +288,13 @@ export class BotTeleService {
 
     const selectRevertDeposit = `
         SELECT 
-        count(case when transaction_type_id = 1 then 1 else null end) as deposit_count,
-        SUM(case when transaction_type_id = 1 then amount else 0 end) as deposit_amount,
-        SUM(case when transaction_type_id = 1 then net_amount else 0 end) as deposit_net_amount,
-        SUM(case when transaction_type_id = 1 then mdr_amount else 0 end) as deposit_mdr_amount
+        count(case when transaction_type_id = 2 then 1 else null end) as deposit_count,
+        SUM(case when transaction_type_id = 2 then amount else 0 end) as deposit_amount,
+        SUM(case when transaction_type_id = 2 then net_amount else 0 end) as deposit_net_amount,
+        SUM(case when transaction_type_id = 2 then mdr_amount else 0 end) as deposit_mdr_amount
         from public."transaction" t 
-        where transaction_type_id IN(1) and status = 'FAILED' and bank_response IS NOT NULL and fund_account_id <> 3 and dest_fund_account_id <> 3
+        where transaction_type_id IN(2) and remark::jsonb ? 'refOrderId'
+        and remark->>'refOrderId' is not null and fund_account_id <> 3 and dest_fund_account_id <> 3
         AND (created_at AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Bangkok') 
         BETWEEN '${startDateTimeDepositWithHours}' AND '${endDateTimeDepositWithHours}';
     `;
@@ -308,10 +318,10 @@ export class BotTeleService {
 - จำนวนรายการ: ${(dataWithdraw[0]?.count_of_items ?? 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
 - ยอดรวมทั้งหมด: ${Number((dataWithdraw[0]?.summary_amount ?? "0")).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
 
-💰 กำไร: ${((dataDeposit[0]?.deposit_amount - dataWithdraw[0]?.summary_amount).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","))} บาท
-📈 กำไร: ${((dataDeposit[0]?.deposit_amount - dataWithdraw[0]?.summary_amount) / dataDeposit[0]?.deposit_amount * 100).toFixed(2)}%
+💰 ส่วนต่าง: ${((dataDeposit[0]?.deposit_amount - dataWithdraw[0]?.summary_amount).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","))} บาท
+📈 ส่วนต่าง %: ${((dataDeposit[0]?.deposit_amount - dataWithdraw[0]?.summary_amount) / dataDeposit[0]?.deposit_amount * 100).toFixed(2)}%
 
-🔄 Revert
+🔄 Refund
 - จำนวนรายการ: ${dataRevertDeposit[0]?.deposit_count.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
 - ยอดรวมทั้งหมด: ${Number(dataRevertDeposit[0]?.deposit_amount).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
     `;
